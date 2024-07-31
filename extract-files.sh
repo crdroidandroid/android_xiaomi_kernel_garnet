@@ -59,9 +59,8 @@ fi
 
 # Create needed directories
 for dir in ./modules/dlkm ./modules/ramdisk ./images ./images/dtbs; do
-    if [[ ! -d $dir ]]; then
-    	mkdir -p $dir
-    fi
+    rm -rf $dir
+    mkdir -p $dir
 done
 
 # Extract the OTA package
