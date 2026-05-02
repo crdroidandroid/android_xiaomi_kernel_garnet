@@ -6,7 +6,6 @@ qcom-dcvs.ko
 clk-dummy.ko
 clk-rpmh.ko
 clk-qcom.ko
-deferred-free-helper.ko
 dispcc-parrot.ko
 gcc-parrot.ko
 gcc-ravelin.ko
@@ -15,7 +14,6 @@ pinctrl-parrot.ko
 pinctrl-ravelin.ko
 qcom-cpufreq-hw.ko
 sched-walt.ko
-sched-walt-debug.ko
 qnoc-parrot.ko
 qnoc-ravelin.ko
 qcom_wdt_core.ko
@@ -40,8 +38,6 @@ memory_dump_v2.ko
 minidump.ko
 msm_dma_iommu_mapping.ko
 msm_geni_serial.ko
-msm_rtb.ko
-ns.ko
 phy-generic.ko
 pinctrl-msm.ko
 qcom_cpu_vendor_hooks.ko
@@ -88,6 +84,5 @@ crypto-qti-hwkm.ko
 hwkm.ko
 ufshcd-crypto-qti.ko
 tmecom-intf.ko
-cqhci-crypto-qti.ko
 bcl_pmic5.ko
 dispcc-ravelin.ko
