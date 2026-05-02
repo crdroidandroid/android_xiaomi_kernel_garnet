@@ -18,7 +18,6 @@ qnoc-parrot.ko
 qnoc-ravelin.ko
 qcom_wdt_core.ko
 icc-rpmh.ko
-qcom_ipc_logging.ko
 qcom-pdc.ko
 qcom_tsens.ko
 thermal_pause.ko
@@ -65,7 +64,6 @@ phy-qcom-ufs.ko
 phy-qcom-ufs-qrbtc-sdm845.ko
 ufs_qcom.ko
 phy-qcom-ufs-qmp-v4-parrot.ko
-debug-regulator.ko
 gh_arm_drv.ko
 gh_ctrl.ko
 gh_dbl.ko
@@ -76,7 +74,6 @@ proxy-consumer.ko
 qcom-spmi-pmic.ko
 spmi-pmic-arb.ko
 qcom-reboot-reason.ko
-qti-regmap-debugfs.ko
 regmap-spmi.ko
 rtc-pm8xxx.ko
 crypto-qti-common.ko

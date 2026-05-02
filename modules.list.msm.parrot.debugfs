@@ -1,0 +1,3 @@
+qcom_ipc_logging.ko
+debug-regulator.ko
+qti-regmap-debugfs.ko
