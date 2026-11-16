@@ -2,6 +2,7 @@
 #
 # Makefile for the i2c bus drivers.
 #
+CFLAGS_i2c-msm-geni.o := -I$(src)
 
 # ACPI drivers
 obj-$(CONFIG_I2C_SCMI)		+= i2c-scmi.o

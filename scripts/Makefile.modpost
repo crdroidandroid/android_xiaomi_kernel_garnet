@@ -192,7 +192,16 @@ modpost-args += -i Module.symvers
 modpost-deps += Module.symvers
 endif
 
-modpost-args += -e $(addprefix -i , $(KBUILD_EXTRA_SYMBOLS))
+# Downstream: the vendor external module Makefiles/Kbuilds (eva, bt, datarmnet,
+# ...) reference sibling Module.symvers files that may not exist in the ROM's
+# inline external-module build, and upstream modpost aborts on a missing -i
+# file. Skip missing ones, but say so instead of dropping them silently.
+missing-extra-symbols := $(filter-out $(wildcard $(KBUILD_EXTRA_SYMBOLS)),$(KBUILD_EXTRA_SYMBOLS))
+ifneq ($(missing-extra-symbols),)
+$(warning KBUILD_EXTRA_SYMBOLS: ignoring missing file(s): $(missing-extra-symbols))
+endif
+
+modpost-args += -e $(addprefix -i , $(wildcard $(KBUILD_EXTRA_SYMBOLS)))
 
 endif # ($(KBUILD_EXTMOD),)
 

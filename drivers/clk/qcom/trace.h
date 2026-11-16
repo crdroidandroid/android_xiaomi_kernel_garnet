@@ -10,7 +10,7 @@
 #if !defined(_TRACE_CLOCK_QCOM_H) || defined(TRACE_HEADER_MULTI_READ)
 #define _TRACE_CLOCK_QCOM
 
-#include <reset.h>
+#include "reset.h"
 #include <linux/tracepoint.h>
 
 DECLARE_EVENT_CLASS(clk_state_dump,

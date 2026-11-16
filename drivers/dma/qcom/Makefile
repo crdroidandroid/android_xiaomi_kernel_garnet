@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0
+ccflags-y += -I$(src)
 obj-$(CONFIG_QCOM_ADM) += qcom_adm.o
 obj-$(CONFIG_QCOM_BAM_DMA) += bam_dma.o
 obj-$(CONFIG_QCOM_GPI_DMA) += gpi.o

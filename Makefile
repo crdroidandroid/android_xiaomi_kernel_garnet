@@ -1175,6 +1175,10 @@ quiet_cmd_headers_install = INSTALL $(INSTALL_HDR_PATH)/include
 PHONY += headers_install
 headers_install: headers
 	$(call cmd,headers_install)
+ifeq ($(KBUILD_EXTMOD),)
+	$(Q)$(srctree)/scripts/garnet_install_module_uapi.sh \
+		$(srctree)/../sm7435-modules $(INSTALL_HDR_PATH)/include
+endif
 
 headers:
 ifeq ($(KBUILD_EXTMOD),)

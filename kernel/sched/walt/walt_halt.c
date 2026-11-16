@@ -6,7 +6,7 @@
 #include <linux/cpumask.h>
 #include <linux/sched/isolation.h>
 #include <trace/hooks/sched.h>
-#include <walt.h>
+#include "walt.h"
 #include "trace.h"
 
 #ifdef CONFIG_HOTPLUG_CPU

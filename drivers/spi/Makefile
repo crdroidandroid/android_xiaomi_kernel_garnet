@@ -2,6 +2,7 @@
 #
 # Makefile for kernel SPI drivers.
 #
+CFLAGS_spi-msm-geni.o := -I$(src)
 
 ccflags-$(CONFIG_SPI_DEBUG) := -DDEBUG
 

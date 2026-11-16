@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-only
+ccflags-y += -I$(src)
 obj-$(CONFIG_QCOM_PMU_LIB) += qcom-pmu-lib.o
 qcom-pmu-lib-y := pmu_lib.o
 obj-$(CONFIG_QCOM_DCVS_FP) += dcvs_fp.o

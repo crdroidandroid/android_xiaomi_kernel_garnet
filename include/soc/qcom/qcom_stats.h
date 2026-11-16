@@ -77,18 +77,18 @@ static inline int qcom_stats_ddr_freqsync_msg(void)
 { return -ENODEV; }
 static inline int ddr_stats_get_freq_count(void)
 { return -ENODEV; }
-int ddr_stats_get_residency(int freq_count, struct ddr_freq_residency *data)
+static inline int ddr_stats_get_residency(int freq_count, struct ddr_freq_residency *data)
 { return -ENODEV; }
-int ddr_stats_get_change_his(struct ddr_stats_change_his_info *ddr_his_info)
+static inline int ddr_stats_get_change_his(struct ddr_stats_change_his_info *ddr_his_info)
 { return -ENODEV; }
-int llc_stats_get_active_scids(struct llc_island_stats_active_scids *llc_active_scids)
+static inline int llc_stats_get_active_scids(struct llc_island_stats_active_scids *llc_active_scids)
 { return -ENODEV; }
 
-bool has_system_slept(void)
+static inline bool has_system_slept(bool *aoss_debug)
 { return false; }
-bool has_subsystem_slept(void)
+static inline bool has_subsystem_slept(void)
 { return false; }
-void subsystem_sleep_debug_enable(bool enable)
+static inline void subsystem_sleep_debug_enable(bool enable)
 { return; }
 
 static inline int cx_stats_get_ss_vote_info(int ss_count,

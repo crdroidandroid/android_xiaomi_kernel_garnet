@@ -1429,6 +1429,13 @@ static int battery_psy_get_prop(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_TEMP:
 		pval->intval = DIV_ROUND_CLOSEST((int)pst->prop[prop_id], 10);
 		break;
+	case POWER_SUPPLY_PROP_CHARGE_COUNTER:
+		pval->intval = pst->prop[prop_id] * 1000;
+		break;
+	case POWER_SUPPLY_PROP_TIME_TO_FULL_AVG:
+		pval->intval = (pst->prop[prop_id] * 60) > 65535 ?
+			-1 : (pst->prop[prop_id] * 60);
+		break;
 	default:
 		pval->intval = pst->prop[prop_id];
 		break;

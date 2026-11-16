@@ -2381,6 +2381,18 @@ config CMDLINE_FORCE
 
 endchoice
 
+config BOOTCONFIG_HWC_IS_PRODUCT_SKU
+	bool "Use HWC version as SKU version"
+	help
+	  Set androidboot.product.hardware.sku based on the HWC version
+	  reported by the bootloader.
+
+config TARGET_PRODUCT_GARNET
+	bool "Target Product Garnet"
+	default n
+	help
+	  Enable configurations and support for Xiaomi Garnet (Redmi Note 13 Pro 5G).
+
 config EFI_STUB
 	bool
 

@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-only
+ccflags-y += -I$(src)
 obj-$(CONFIG_GH_VIRT_WATCHDOG)+= gh_virt_wdt.o
 obj-$(CONFIG_GH_CTRL)           += gh_ctrl.o
 obj-$(CONFIG_GH_DBL)            += gh_dbl.o

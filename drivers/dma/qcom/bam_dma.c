@@ -81,8 +81,9 @@ static void __ftrace_dbg(struct device *dev, const char *fmt, ...)
 #define ftrace_dbg(dev, fmt, ...)            \
 	__ftrace_dbg(dev, fmt, ##__VA_ARGS__)\
 
-#ifdef CONFIG_DEBUG_FS
 #define DMA_IPC_LOGPAGES 1
+
+#ifdef CONFIG_DEBUG_FS
 #define DMA_BAM_DBG(ctxt, dev, fmt...) do {  \
 	if (ctxt) {			     \
 		ipc_log_string(ctxt, fmt);   \

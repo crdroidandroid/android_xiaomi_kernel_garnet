@@ -302,6 +302,7 @@ out:
 
 static const struct of_device_id ufs_qcom_phy_qmp_v4_of_match[] = {
 	{.compatible = "qcom,ufs-phy-qmp-v4-waipio"},
+	{.compatible = "qcom,ufs-phy-qmp-v4-parrot"},
 	{},
 };
 MODULE_DEVICE_TABLE(of, ufs_qcom_phy_qmp_v4_of_match);

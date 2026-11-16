@@ -34,8 +34,8 @@ static struct seq_buf *md_meminfo_seq_buf;
 /* Slabinfo */
 static struct seq_buf *md_slabinfo_seq_buf;
 
-static size_t md_pageowner_dump_size = SZ_2M;
-static char *md_pageowner_dump_addr;
+static size_t md_pageowner_dump_size __maybe_unused = SZ_2M;
+static char *md_pageowner_dump_addr __maybe_unused;
 
 static size_t md_slabowner_dump_size = SZ_2M;
 static char *md_slabowner_dump_addr;
@@ -51,8 +51,8 @@ static struct list_head *md_debug_slab_caches;
 static struct mutex *md_debug_slab_mutex;
 static struct static_key *md_debug_page_owner_inited;
 static struct static_key *md_debug_slub_debug_enabled;
-static unsigned long *md_debug_min_low_pfn;
-static unsigned long *md_debug_max_pfn;
+static unsigned long *md_debug_min_low_pfn __maybe_unused;
+static unsigned long *md_debug_max_pfn __maybe_unused;
 
 #define DMA_BUF_HASH_SIZE (1 << 20)
 #define DMA_BUF_HASH_SEED 0x9747b28c
@@ -385,26 +385,7 @@ static void update_dump_size(char *name, size_t size, char **addr, size_t *dump_
 	}
 }
 
-#ifdef CONFIG_PAGE_OWNER
-static unsigned long page_owner_filter = 0xF;
-static unsigned long page_owner_handles_size =  SZ_16K;
-static int nr_page_owner_handles, nr_slab_owner_handles;
-static LIST_HEAD(accounted_call_site_list);
-static DEFINE_SPINLOCK(accounted_call_site_lock);
-struct accounted_call_site {
-	struct list_head list;
-	char name[50];
-};
-
-bool is_page_owner_enabled(void)
-{
-	if (md_debug_page_owner_inited &&
-		atomic_read(&md_debug_page_owner_inited->enabled))
-		return true;
-	return false;
-
-}
-
+#if defined(CONFIG_PAGE_OWNER) || defined(CONFIG_SLUB_DEBUG)
 static bool found_stack(depot_stack_handle_t handle,
 		 char *dump_addr, size_t dump_size,
 		 unsigned long handles_size, int *nr_handles)
@@ -425,6 +406,27 @@ static bool found_stack(depot_stack_handle_t handle,
 		pr_err_ratelimited("Can't stores handles increase handles size\n");
 	}
 	return false;
+}
+#endif
+
+#ifdef CONFIG_PAGE_OWNER
+static unsigned long page_owner_filter = 0xF;
+static unsigned long page_owner_handles_size =  SZ_16K;
+static int nr_page_owner_handles;
+static LIST_HEAD(accounted_call_site_list);
+static DEFINE_SPINLOCK(accounted_call_site_lock);
+struct accounted_call_site {
+	struct list_head list;
+	char name[50];
+};
+
+bool is_page_owner_enabled(void)
+{
+	if (md_debug_page_owner_inited &&
+		atomic_read(&md_debug_page_owner_inited->enabled))
+		return true;
+	return false;
+
 }
 
 static bool check_unaccounted(char *buf, ssize_t count,
@@ -820,6 +822,7 @@ static inline void md_dump_pageowner(char *addr, size_t dump_size);
 
 static unsigned long slab_owner_filter;
 static unsigned long slab_owner_handles_size = SZ_16K;
+static int nr_slab_owner_handles;
 
 static bool is_slub_debug_enabled(void)
 {
@@ -1370,13 +1373,17 @@ void md_dump_memory(void)
 	if (md_slabinfo_seq_buf)
 		md_dump_slabinfo(md_slabinfo_seq_buf);
 
+#ifdef CONFIG_PAGE_OWNER
 	if (md_pageowner_dump_addr)
 		md_dump_pageowner(md_pageowner_dump_addr,
 				  md_pageowner_dump_size - page_owner_handles_size);
+#endif
 
+#ifdef CONFIG_SLUB_DEBUG
 	if (md_slabowner_dump_addr)
 		md_dump_slabowner(md_slabowner_dump_addr,
 				  md_slabowner_dump_size - slab_owner_handles_size);
+#endif
 
 	if (md_dma_buf_info_addr)
 		md_dma_buf_info(md_dma_buf_info_addr, md_dma_buf_info_size);
@@ -1406,10 +1413,12 @@ int md_minidump_memory_init(void)
 				  &md_slabinfo_seq_buf);
 #endif
 
+#ifdef CONFIG_PAGE_OWNER
 	if (is_page_owner_enabled()) {
 		md_register_memory_dump(md_pageowner_dump_size, "PAGEOWNER");
 		md_debugfs_pageowner(minidump_dir);
 	}
+#endif
 
 	if (is_slub_debug_enabled()) {
 		md_register_memory_dump(md_slabowner_dump_size, "SLABOWNER");

@@ -2,6 +2,7 @@
 #
 # Makefile for kernel SLIMbus framework.
 #
+ccflags-y += -I$(src)
 obj-$(CONFIG_SLIMBUS)			+= slimbus.o
 slimbus-y				:= core.o messaging.o sched.o stream.o
 
