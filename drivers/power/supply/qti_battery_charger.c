@@ -30,6 +30,8 @@
 #define MSG_TYPE_NOTIFY			2
 
 /* opcode for battery charger */
+#define MAX_THERMAL_LEVEL		16
+
 #define BC_SET_NOTIFY_REQ		0x04
 #define BC_DISABLE_NOTIFY_REQ		0x05
 #define BC_NOTIFY_IND			0x07
@@ -1366,11 +1368,14 @@ static int __battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
 	return rc;
 }
 
+/*
+ * The garnet ADSP firmware takes a thermal level index in BATT_CHG_CTRL_LIM,
+ * as on garnet 5.10, and asserts in charger_process when it gets a current.
+ */
 static int battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
 					int val)
 {
 	int rc;
-	u32 fcc_ua, prev_fcc_ua;
 
 	if (!bcdev->num_thermal_levels)
 		return 0;
@@ -1380,25 +1385,24 @@ static int battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
 		return -EINVAL;
 	}
 
-	if (val < 0 || val > bcdev->num_thermal_levels)
+	if (val < 0 || val >= bcdev->num_thermal_levels)
 		return -EINVAL;
 
-	if (bcdev->thermal_fcc_step == 0)
-		fcc_ua = bcdev->thermal_levels[val];
-	else
-		fcc_ua = bcdev->psy_list[PSY_TYPE_BATTERY].prop[BATT_CHG_CTRL_LIM_MAX]
-				- (bcdev->thermal_fcc_step * val);
-
-	prev_fcc_ua = bcdev->thermal_fcc_ua;
-	bcdev->thermal_fcc_ua = fcc_ua;
-
-	rc = __battery_psy_set_charge_current(bcdev, fcc_ua);
+	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_BATTERY],
+			       BATT_CHG_CTRL_LIM, val);
 	if (!rc)
 		bcdev->curr_thermal_level = val;
-	else
-		bcdev->thermal_fcc_ua = prev_fcc_ua;
 
 	return rc;
+}
+
+static int battery_psy_set_fcc(struct battery_chg_dev *bcdev, u32 prop_id,
+			       int val)
+{
+	u32 temp = val < 0 ? UINT_MAX : val;
+
+	return write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_BATTERY],
+				 prop_id, temp);
 }
 
 static int battery_psy_get_prop(struct power_supply *psy,
@@ -1446,6 +1450,12 @@ static int battery_psy_get_prop(struct power_supply *psy,
 		pval->intval = (pst->prop[prop_id] * 60) > 65535 ?
 			-1 : (pst->prop[prop_id] * 60);
 		break;
+	case POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT:
+		pval->intval = bcdev->curr_thermal_level;
+		break;
+	case POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT_MAX:
+		pval->intval = bcdev->num_thermal_levels;
+		break;
 	default:
 		pval->intval = pst->prop[prop_id];
 		break;
@@ -1459,8 +1469,16 @@ static int battery_psy_set_prop(struct power_supply *psy,
 		const union power_supply_propval *pval)
 {
 	struct battery_chg_dev *bcdev = power_supply_get_drvdata(psy);
+	int prop_id;
 
 	switch (prop) {
+	case POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT:
+		return battery_psy_set_charge_current(bcdev, pval->intval);
+	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:
+		prop_id = get_property_id(&bcdev->psy_list[PSY_TYPE_BATTERY], prop);
+		if (prop_id < 0)
+			return prop_id;
+		return battery_psy_set_fcc(bcdev, prop_id, pval->intval);
 	case POWER_SUPPLY_PROP_CHARGE_CONTROL_START_THRESHOLD:
 		return battery_psy_set_charge_start_threshold(bcdev,
 								pval->intval);
@@ -1478,6 +1496,8 @@ static int battery_psy_prop_is_writeable(struct power_supply *psy,
 		enum power_supply_property prop)
 {
 	switch (prop) {
+	case POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT:
+	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:
 	case POWER_SUPPLY_PROP_CHARGE_CONTROL_START_THRESHOLD:
 	case POWER_SUPPLY_PROP_CHARGE_CONTROL_END_THRESHOLD:
 		return 1;
@@ -2524,7 +2544,8 @@ static int battery_chg_parse_dt(struct battery_chg_dev *bcdev)
 		}
 	}
 
-	bcdev->num_thermal_levels = len;
+	/* garnet 5.10: the firmware has 16 thermal levels of its own */
+	bcdev->num_thermal_levels = MAX_THERMAL_LEVEL;
 	bcdev->thermal_fcc_ua = pst->prop[BATT_CHG_CTRL_LIM_MAX];
 
 	return 0;
