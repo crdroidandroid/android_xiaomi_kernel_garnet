@@ -24,6 +24,7 @@
 #define HARDWARE_PROJECT_M11A       14 // mondrian
 #define HARDWARE_PROJECT_M16T       15 // marble
 #define HARDWARE_PROJECT_M80        11 // yudi
+#define HARDWARE_PROJECT_N16        17 // garnet
 
 typedef enum {
 	CountryCN = 0x00,
