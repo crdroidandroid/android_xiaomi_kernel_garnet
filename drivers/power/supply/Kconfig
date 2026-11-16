@@ -976,6 +976,22 @@ config CHARGER_QCOM_SMB2
 	  adds support for the SMB2 switch mode battery charger found
 	  in PMI8998 and related PMICs.
 
+config BQ_FUEL_GAUGE
+	bool "Xiaomi BQ fuel gauge support in the QTI battery charger"
+	depends on QTI_BATTERY_CHARGER
+	help
+	  Say Y here if the battery is measured by a TI BQ fuel gauge behind
+	  the charger firmware, as on Xiaomi garnet. The charger driver then
+	  reports the battery capacity and temperature the way the Xiaomi
+	  firmware expects and registers a battery thermal zone.
+
+config BQ_FG_UPDATE
+	bool "Xiaomi BQ fuel gauge periodic update in the QTI battery charger"
+	depends on QTI_BATTERY_CHARGER
+	help
+	  Say Y here to let the charger driver periodically push the board
+	  temperature and screen state to the Xiaomi charger firmware.
+
 source "drivers/power/supply/qcom/Kconfig"
 
 endif # POWER_SUPPLY

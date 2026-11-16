@@ -105,7 +105,7 @@ def define_parrot():
         "drivers/power/reset/qcom-pon.ko",
         "drivers/power/reset/qcom-reboot-reason.ko",
         "drivers/power/reset/reboot-mode.ko",
-        "drivers/power/supply/qti_battery_charger.ko",
+        "drivers/power/supply/qti_battery_charger_main.ko",
         "drivers/power/supply/schgm-flash.ko",
         "drivers/pwm/pwm-qti-lpg.ko",
         "drivers/regulator/debug-regulator.ko",
