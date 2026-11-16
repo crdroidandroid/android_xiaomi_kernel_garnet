@@ -21,6 +21,7 @@
 #include <linux/kmsg_dump.h>
 #include <linux/of.h>
 #include <linux/version.h>
+#include <linux/notifier.h>
 #include <linux/reboot.h>
 #include <linux/platform_device.h>
 #include <generated/utsrelease.h>
@@ -86,8 +87,7 @@ static char *log_type[4] = {
 	"LAST LOGCAT"
 };
 
-int g_long_press_reason = MTD_DUMP_LONG_PRESS;
-EXPORT_SYMBOL_GPL(g_long_press_reason);
+extern struct blocking_notifier_head pwrkey_irq_notifier_list;
 
 static unsigned long record_size = 4096;
 static unsigned long lkmsg_record_size = 512 * 1024;
@@ -120,6 +120,7 @@ struct pmsg_platform_data {
 static struct mtdoops_context {
 	struct kmsg_dumper dump;
 	struct notifier_block reboot_nb;
+	struct notifier_block pwrkey_long_press_nb;
 	struct pmsg_platform_data pmsg_data;
 
 	int mtd_index;
@@ -504,6 +505,13 @@ static int mtdoops_reboot_nb_handle(struct notifier_block *this, unsigned long e
 }
 
 
+static int pwrkey_long_press_irq_event(struct notifier_block *this,
+				       unsigned long event, void *ptr)
+{
+	mtdoops_do_dump_if(MTD_DUMP_LONG_PRESS);
+	return NOTIFY_DONE;
+}
+
 static void mtdoops_notify_add(struct mtd_info *mtd)
 {
 	struct mtdoops_context *cxt = &oops_cxt;
@@ -559,6 +567,11 @@ static void mtdoops_notify_add(struct mtd_info *mtd)
 	cxt->reboot_nb.priority = 255;
 	register_reboot_notifier(&cxt->reboot_nb);
 
+	cxt->pwrkey_long_press_nb.notifier_call = pwrkey_long_press_irq_event;
+	cxt->pwrkey_long_press_nb.priority = 255;
+	blocking_notifier_chain_register(&pwrkey_irq_notifier_list,
+					 &cxt->pwrkey_long_press_nb);
+
 	cxt->mtd = mtd;
 	cxt->oops_pages = (int)mtd->size / record_size;
 	find_next_position(cxt);
@@ -576,6 +589,8 @@ static void mtdoops_notify_remove(struct mtd_info *mtd)
 		printk(KERN_WARNING "mtdoops: could not unregister kmsg_dumper\n");
 
 	unregister_reboot_notifier(&cxt->reboot_nb);
+	blocking_notifier_chain_unregister(&pwrkey_irq_notifier_list,
+					   &cxt->pwrkey_long_press_nb);
 
 	cxt->mtd = NULL;
 	flush_work(&cxt->work_erase);

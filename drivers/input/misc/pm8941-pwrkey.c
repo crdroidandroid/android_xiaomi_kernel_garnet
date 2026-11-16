@@ -12,6 +12,7 @@
 #include <linux/ktime.h>
 #include <linux/log2.h>
 #include <linux/module.h>
+#include <linux/notifier.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/platform_device.h>
@@ -56,11 +57,6 @@
 #define  PON_DBC_SHIFT_GEN1		6
 #define  PON_DBC_SHIFT_GEN2		14
 
-#if IS_ENABLED(CONFIG_MTD_OOPS)
-extern int g_long_press_reason;
-extern void mtdoops_do_dump_if(int reason);
-#endif
-
 struct pm8941_data {
 	unsigned int	pull_up_bit;
 	unsigned int	status_bit;
@@ -89,6 +85,9 @@ struct pm8941_pwrkey {
 	bool last_status;
 	const struct pm8941_data *data;
 };
+
+BLOCKING_NOTIFIER_HEAD(pwrkey_irq_notifier_list);
+EXPORT_SYMBOL_GPL(pwrkey_irq_notifier_list);
 
 static int pm8941_reboot_notify(struct notifier_block *nb,
 				unsigned long code, void *unused)
@@ -189,17 +188,15 @@ static irqreturn_t pm8941_pwrkey_irq(int irq, void *_data)
 
 	if (!strcmp(pwrkey->data->name,"pmic_pwrkey_bark")){
 
-#if IS_ENABLED(CONFIG_MTD_OOPS)
 		err = regmap_read(pwrkey->regmap,
 			pwrkey->baseaddr + PON_RT_STS, &sts);
 		if (err)
 			return IRQ_HANDLED;
 		sts &= pwrkey->data->status_bit;
 		if(sts){
-			dev_err(pwrkey->dev, "pwrkey_bark_irq trigger, start dump mtdoops");
-			mtdoops_do_dump_if(g_long_press_reason);
+			dev_err(pwrkey->dev, "pwrkey_bark_irq trigger, call notifier chain to start mtdoops dump");
+			blocking_notifier_call_chain(&pwrkey_irq_notifier_list, 0, NULL);
 		}
-#endif
 		return IRQ_HANDLED;
 	}
 	else if (!strcmp(pwrkey->data->name,"pmic_pwrkey_resin_bark")){
