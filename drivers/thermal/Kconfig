@@ -522,4 +522,32 @@ config LOONGSON2_THERMAL
 	  is higher than the high temperature threshold or lower than the low
 	  temperature threshold, the interrupt will occur.
 
+config MI_THERMAL_INTERFACE
+	tristate "Xiaomi thermal control interface"
+	depends on THERMAL
+	help
+	  Say M here to build the Xiaomi thermal_message interface that
+	  mi_thermald uses to read the board temperature and to pass the
+	  thermal policy, screen state and charge limits to the kernel.
+
+config MI_THERMAL_MULTI_CHARGE
+	bool "Xiaomi thermal interface multi charge nodes"
+	depends on MI_THERMAL_INTERFACE
+	help
+	  Say Y here to add the two multi charge sysfs nodes to
+	  thermal_message.
+
+config HAVE_CHARGE_TEMP
+	bool "Xiaomi thermal interface charge temperature node"
+	depends on MI_THERMAL_INTERFACE
+	help
+	  Say Y here to add the charge temperature node to thermal_message.
+
+config HAVE_MULTI_SCREEN
+	bool "Xiaomi thermal interface secondary screen support"
+	depends on MI_THERMAL_INTERFACE
+	help
+	  Say Y here if the device has a second screen whose state the
+	  thermal interface should follow.
+
 endif
